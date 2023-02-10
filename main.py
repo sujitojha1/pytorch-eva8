@@ -1,5 +1,8 @@
 from tqdm import tqdm
 import torch
+import torch.optim as optim
+from torch.optim.lr_scheduler import StepLR
+import torch.nn as nn
 
 class train:
 
@@ -83,3 +86,20 @@ class test:
 
         # Save.
         self.test_acc.append(100. * correct / len(testloader.dataset))
+
+def training(net, device, trainloader, testloader, optimizer, criterion, EPOCHS, lr=0.2)
+
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(net.parameters(), lr, momentum=0.9)
+    scheduler = StepLR(optimizer, step_size=6, gamma=0.1)
+
+    train = train()
+    test = test()
+
+    for epoch in range(EPOCHS):  # loop over the dataset multiple times
+
+        train.execute(net, device, trainloader, optimizer, criterion, epoch)
+        test.execute(net, device, testloader, criterion)
+        scheduler.step()
+
+    print('Finished Training')
