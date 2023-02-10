@@ -6,8 +6,9 @@ import os
 
 import cv2
 
-from albumentations import Compose, PadIfNeeded, RandomCrop, Normalize, HorizontalFlip, ShiftScaleRotate, CoarseDropout, Cutout
+from albumentations import Compose, PadIfNeeded, Normalize, HorizontalFlip, ShiftScaleRotate, CoarseDropout, Cutout
 from albumentations.pytorch.transforms import ToTensorV2
+from torchvision.transforms import RandomCrop
 
 class album_Compose_train():
     def __init__(self):
