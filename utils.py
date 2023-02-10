@@ -123,8 +123,6 @@ def unnormalize(img):
 #
 def plot_loss_accuracy_graph(trainObj, testObj, EPOCHS):
 
-    plt.style.use('seaborn-poster')
-
     fig, ax = plt.subplots(1, 2, figsize=(15, 5))
 
     train_epoch_linspace = np.linspace(1, EPOCHS, len(trainObj.train_losses))
