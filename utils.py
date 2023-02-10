@@ -121,6 +121,44 @@ def unnormalize(img):
   
     return np.transpose(img, (1,2,0))
 
+#
+def plot_loss_accuracy_graph(trainObj, testObj, EPOCHS):
+
+    plt.style.use('seaborn-poster')
+
+    fig, ax = plt.subplots(1, 2, figsize=(15, 5))
+
+    train_epoch_linspace = np.linspace(1, EPOCHS, len(trainObj.train_losses))
+    test_epoch_linspace = np.linspace(1, EPOCHS, len(testObj.test_losses))
+
+    # Loss Plot
+    ax[0].plot(train_epoch_linspace, trainObj.train_losses, label='Training Loss')
+    ax[0].set_xlabel('Epochs')
+    ax[0].set_ylabel('Loss')
+    ax[0].set_title('Loss vs. Epochs')
+    ax[0].legend()
+
+    ax2 = ax[0].twinx()
+    ax2.plot(test_epoch_linspace, testObj.test_losses, label='Test Loss', color='red')
+    ax2.set_ylabel('Loss')
+    ax2.legend(loc='center right')
+
+    # Accuracy Plot
+    ax[1].plot(train_epoch_linspace, trainObj.train_acc, label='Training Accuracy')
+    ax[1].set_xlabel('Epochs')
+    ax[1].set_ylabel('Accuracy')
+    ax[1].set_title('Accuracy vs. Epochs')
+    ax[1].legend()
+
+    ax2 = ax[1].twinx()
+    ax2.plot(test_epoch_linspace, testObj.test_acc, label='Test Accuracy', color='red')
+    ax2.set_ylabel('Accuracy')
+    ax2.legend(loc='center right')
+
+    plt.tight_layout()
+    plt.show()
+
+
 # define a function to plot misclassified images
 def plot_misclassified_images(model, test_loader, classes, device):
     # set model to evaluation mode

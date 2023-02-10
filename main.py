@@ -37,13 +37,13 @@ class train:
 
             # Calculate loss
             loss = criterion(outputs, targets)
-            self.train_losses.append(loss)
 
             # Backpropagation
             loss.backward()
             optimizer.step()
 
             train_loss += loss.item()
+            self.train_losses.append(loss.item())
             
             _, predicted = outputs.max(1)
             processed += targets.size(0)
