@@ -87,7 +87,7 @@ class test:
         # Save.
         self.test_acc.append(100. * correct / len(testloader.dataset))
 
-def training(net, device, trainloader, testloader, optimizer, criterion, EPOCHS, lr=0.2)
+def trainNetwork(net, device, trainloader, testloader, optimizer, criterion, EPOCHS, lr=0.2)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(net.parameters(), lr, momentum=0.9)
