@@ -93,13 +93,15 @@ def trainNetwork(net, device, trainloader, testloader, EPOCHS, lr=0.2):
     optimizer = optim.SGD(net.parameters(), lr, momentum=0.9)
     scheduler = StepLR(optimizer, step_size=6, gamma=0.1)
 
-    train = train()
-    test = test()
+    trainObj = train()
+    testObj = test()
 
     for epoch in range(EPOCHS):  # loop over the dataset multiple times
 
-        train.execute(net, device, trainloader, optimizer, criterion, epoch)
-        test.execute(net, device, testloader, criterion)
+        trainObj.execute(net, device, trainloader, optimizer, criterion, epoch)
+        testObj.execute(net, device, testloader, criterion)
         scheduler.step()
 
     print('Finished Training')
+
+    return trainObj, testObj
