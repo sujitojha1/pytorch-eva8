@@ -389,7 +389,9 @@ class GradCAM:
     def __call__(self, input, class_idx=None, retain_graph=False):
         return self.forward(input, class_idx, retain_graph)
 
-def plotGradCAM(net)
+def plotGradCAM(net, testloader, classes)
+
+    images, labels = next(iter(testloader))
     gradcam = GradCAM.from_config(model_type='resnet', arch=net, layer_name='layer4')
 
     fig = plt.figure(figsize=(5, 10))
