@@ -415,7 +415,7 @@ def plotGradCAM(net, testloader, classes, device):
 
     fig = plt.figure(figsize=(5, 10))
     idx_cnt=1
-    for idx in np.arange(len(labels.numpy())):
+    for idx in np.arange(5):
 
         img = images[idx]
         lbl = labels.numpy()[idx]
@@ -432,6 +432,7 @@ def plotGradCAM(net, testloader, classes, device):
         # Show images
         # for idx in np.arange(len(labels.numpy())):
         # Original picture
+        
         ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
         npimg = np.transpose(org_img[0].cpu().numpy(),(1,2,0))
         ax.imshow(npimg, cmap='gray')
