@@ -417,7 +417,7 @@ def plotGradCAM(net, testloader, classes, device):
     predicted_labels = []
     
     with torch.no_grad():
-        for data, target in test_loader:
+        for data, target in testloader:
             data, target = data.to(device), target.to(device)
             output = model(data)
             _, pred = torch.max(output, 1)
