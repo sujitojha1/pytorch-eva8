@@ -410,15 +410,32 @@ class GradCAM:
 
 def plotGradCAM(net, testloader, classes, device):
 
-    images, labels = next(iter(testloader))
+    net.eval()
+
+    misclassified_images = []
+    actual_labels = []
+    predicted_labels = []
+    
+    with torch.no_grad():
+        for data, target in test_loader:
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            _, pred = torch.max(output, 1)
+            for i in range(len(pred)):
+                if pred[i] != target[i]:
+                    misclassified_images.append(data[i])
+                    actual_labels.append(classes[target[i]])
+                    predicted_labels.append(classes[pred[i]])
+
     gradcam = GradCAM.from_config(model_type='resnet', arch=net, layer_name='layer4')
 
     fig = plt.figure(figsize=(5, 10))
     idx_cnt=1
-    for idx in np.arange(5):
+    for idx in np.arange(10):
 
-        img = images[idx]
-        lbl = labels.numpy()[idx]
+        img = misclassified_images[idx]
+        lbl = actual_labels.numpy()[idx]
+        lblp = predicted_labels.numpy()[idx]
 
         # get an image and normalize with mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
         img = img.unsqueeze(0).to(device)
@@ -436,7 +453,7 @@ def plotGradCAM(net, testloader, classes, device):
         ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
         npimg = np.transpose(org_img[0].cpu().numpy(),(1,2,0))
         ax.imshow(npimg, cmap='gray')
-        ax.set_title("Label={}".format(str(classes[lbl])))
+        ax.set_title(f"Label={str(classes[lbl])}\npred={classes[lblp]}")
         idx_cnt+=1
 
         ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
