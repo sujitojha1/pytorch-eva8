@@ -309,7 +309,7 @@ def find_resnet_layer(arch, target_layer_name):
     return target_layer
 
 
-def denormalize1(tensor, mean, std):
+def denormalize(tensor, mean, std):
     if not tensor.ndimension() == 4:
         raise TypeError('tensor should be 4D')
 
@@ -319,7 +319,7 @@ def denormalize1(tensor, mean, std):
     return tensor.mul(std).add(mean)
 
 
-def normalize1(tensor, mean, std):
+def normalize(tensor, mean, std):
     if not tensor.ndimension() == 4:
         raise TypeError('tensor should be 4D')
 
@@ -329,143 +329,125 @@ def normalize1(tensor, mean, std):
     return tensor.sub(mean).div(std)
 
 
-class Normalize(object):
-    def __init__(self, mean, std):
-        self.mean = mean
-        self.std = std
+class GradCAM:
+    """Calculate GradCAM salinecy map.
+    Args:
+        input: input image with shape of (1, 3, H, W)
+        class_idx (int): class index for calculating GradCAM.
+                If not specified, the class index that makes the highest model prediction score will be used.
+    Return:
+        mask: saliency map of the same spatial dimension with input
+        logit: model output
+    A simple example:
+        # initialize a model, model_dict and gradcam
+        resnet = torchvision.models.resnet101(pretrained=True)
+        resnet.eval()
+        gradcam = GradCAM.from_config(model_type='resnet', arch=resnet, layer_name='layer4')
+        # get an image and normalize with mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
+        img = load_img()
+        normed_img = normalizer(img)
+        # get a GradCAM saliency map on the class index 10.
+        mask, logit = gradcam(normed_img, class_idx=10)
+        # make heatmap from mask and synthesize saliency map using heatmap and img
+        heatmap, cam_result = visualize_cam(mask, img)
+    """
 
-    def __call__(self, tensor):
-        return self.do(tensor)
+    def __init__(self, arch: torch.nn.Module, target_layer: torch.nn.Module):
+        self.model_arch = arch
 
-    def do(self, tensor):
-        return normalize1(tensor, self.mean, self.std)
+        self.gradients = dict()
+        self.activations = dict()
 
-    def undo(self, tensor):
-        return denormalize1(tensor, self.mean, self.std)
+        def backward_hook(module, grad_input, grad_output):
+            self.gradients['value'] = grad_output[0]
 
-    def __repr__(self):
-        return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
+        def forward_hook(module, input, output):
+            self.activations['value'] = output
 
+        target_layer.register_forward_hook(forward_hook)
+        target_layer.register_backward_hook(backward_hook)
 
-# class GradCAM:
-#     """Calculate GradCAM salinecy map.
-#     Args:
-#         input: input image with shape of (1, 3, H, W)
-#         class_idx (int): class index for calculating GradCAM.
-#                 If not specified, the class index that makes the highest model prediction score will be used.
-#     Return:
-#         mask: saliency map of the same spatial dimension with input
-#         logit: model output
-#     A simple example:
-#         # initialize a model, model_dict and gradcam
-#         resnet = torchvision.models.resnet101(pretrained=True)
-#         resnet.eval()
-#         gradcam = GradCAM.from_config(model_type='resnet', arch=resnet, layer_name='layer4')
-#         # get an image and normalize with mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
-#         img = load_img()
-#         normed_img = normalizer(img)
-#         # get a GradCAM saliency map on the class index 10.
-#         mask, logit = gradcam(normed_img, class_idx=10)
-#         # make heatmap from mask and synthesize saliency map using heatmap and img
-#         heatmap, cam_result = visualize_cam(mask, img)
-#     """
+    @classmethod
+    def from_config(cls, arch: torch.nn.Module, model_type: str, layer_name: str):
+        target_layer = layer_finders[model_type](arch, layer_name)
+        return cls(arch, target_layer)
 
-#     def __init__(self, arch: torch.nn.Module, target_layer: torch.nn.Module):
-#         self.model_arch = arch
+    def saliency_map_size(self, *input_size):
+        device = next(self.model_arch.parameters()).device
+        self.model_arch(torch.zeros(1, 3, *input_size, device=device))
+        return self.activations['value'].shape[2:]
 
-#         self.gradients = dict()
-#         self.activations = dict()
+    def forward(self, input, class_idx=None, retain_graph=False):
+        b, c, h, w = input.size()
 
-#         def backward_hook(module, grad_input, grad_output):
-#             self.gradients['value'] = grad_output[0]
+        logit = self.model_arch(input)
+        if class_idx is None:
+            score = logit[:, logit.max(1)[-1]].squeeze()
+        else:
+            score = logit[:, class_idx].squeeze()
 
-#         def forward_hook(module, input, output):
-#             self.activations['value'] = output
+        self.model_arch.zero_grad()
+        score.backward(retain_graph=retain_graph)
+        gradients = self.gradients['value']
+        activations = self.activations['value']
+        b, k, u, v = gradients.size()
 
-#         target_layer.register_forward_hook(forward_hook)
-#         target_layer.register_backward_hook(backward_hook)
+        alpha = gradients.view(b, k, -1).mean(2)
+        # alpha = F.relu(gradients.view(b, k, -1)).mean(2)
+        weights = alpha.view(b, k, 1, 1)
 
-#     @classmethod
-#     def from_config(cls, arch: torch.nn.Module, model_type: str, layer_name: str):
-#         target_layer = layer_finders[model_type](arch, layer_name)
-#         return cls(arch, target_layer)
+        saliency_map = (weights*activations).sum(1, keepdim=True)
+        saliency_map = F.relu(saliency_map)
+        saliency_map = F.upsample(saliency_map, size=(h, w), mode='bilinear', align_corners=False)
+        saliency_map_min, saliency_map_max = saliency_map.min(), saliency_map.max()
+        saliency_map = (saliency_map - saliency_map_min).div(saliency_map_max - saliency_map_min).data
 
-#     def saliency_map_size(self, *input_size):
-#         device = next(self.model_arch.parameters()).device
-#         self.model_arch(torch.zeros(1, 3, *input_size, device=device))
-#         return self.activations['value'].shape[2:]
+        return saliency_map, logit
 
-#     def forward(self, input, class_idx=None, retain_graph=False):
-#         b, c, h, w = input.size()
+    def __call__(self, input, class_idx=None, retain_graph=False):
+        return self.forward(input, class_idx, retain_graph)
 
-#         logit = self.model_arch(input)
-#         if class_idx is None:
-#             score = logit[:, logit.max(1)[-1]].squeeze()
-#         else:
-#             score = logit[:, class_idx].squeeze()
+def plotGradCAM(net, testloader, classes, device):
 
-#         self.model_arch.zero_grad()
-#         score.backward(retain_graph=retain_graph)
-#         gradients = self.gradients['value']
-#         activations = self.activations['value']
-#         b, k, u, v = gradients.size()
+    images, labels = next(iter(testloader))
+    gradcam = GradCAM.from_config(model_type='resnet', arch=net, layer_name='layer4')
 
-#         alpha = gradients.view(b, k, -1).mean(2)
-#         # alpha = F.relu(gradients.view(b, k, -1)).mean(2)
-#         weights = alpha.view(b, k, 1, 1)
+    fig = plt.figure(figsize=(5, 10))
+    idx_cnt=1
+    for idx in np.arange(len(labels.numpy())):
 
-#         saliency_map = (weights*activations).sum(1, keepdim=True)
-#         saliency_map = F.relu(saliency_map)
-#         saliency_map = F.upsample(saliency_map, size=(h, w), mode='bilinear', align_corners=False)
-#         saliency_map_min, saliency_map_max = saliency_map.min(), saliency_map.max()
-#         saliency_map = (saliency_map - saliency_map_min).div(saliency_map_max - saliency_map_min).data
+        img = images[idx]
+        lbl = labels.numpy()[idx]
 
-#         return saliency_map, logit
+        # get an image and normalize with mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
+        img = img.unsqueeze(0).to(device)
+        org_img = denormalize(img,mean=(0.4914, 0.4822, 0.4471),std=(0.2469, 0.2433, 0.2615))
 
-#     def __call__(self, input, class_idx=None, retain_graph=False):
-#         return self.forward(input, class_idx, retain_graph)
+        # get a GradCAM saliency map on the class index 10.
+        mask, logit = gradcam(img, class_idx=lbl)
+        # make heatmap from mask and synthesize saliency map using heatmap and img
+        heatmap, cam_result = visualize_cam(mask, org_img, alpha=0.4)
 
-# def plotGradCAM(net, testloader, classes, device):
+        # Show images
+        # for idx in np.arange(len(labels.numpy())):
+        # Original picture
+        ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
+        npimg = np.transpose(org_img[0].cpu().numpy(),(1,2,0))
+        ax.imshow(npimg, cmap='gray')
+        ax.set_title("Label={}".format(str(classes[lbl])))
+        idx_cnt+=1
 
-#     images, labels = next(iter(testloader))
-#     gradcam = GradCAM.from_config(model_type='resnet', arch=net, layer_name='layer4')
+        ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
+        npimg = np.transpose(heatmap,(1,2,0))
+        ax.imshow(npimg, cmap='gray')
+        ax.set_title("HeatMap".format(str(classes[lbl])))
+        idx_cnt+=1
 
-#     fig = plt.figure(figsize=(5, 10))
-#     idx_cnt=1
-#     for idx in np.arange(len(labels.numpy())):
+        ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
+        npimg = np.transpose(cam_result,(1,2,0))
+        ax.imshow(npimg, cmap='gray')
+        ax.set_title("GradCAM".format(str(classes[lbl])))
+        idx_cnt+=1
 
-#         img = images[idx]
-#         lbl = labels.numpy()[idx]
-
-#         # get an image and normalize with mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
-#         img = img.unsqueeze(0).to(device)
-#         org_img = denormalize(img,mean=(0.4914, 0.4822, 0.4471),std=(0.2469, 0.2433, 0.2615))
-
-#         # get a GradCAM saliency map on the class index 10.
-#         mask, logit = gradcam(img, class_idx=lbl)
-#         # make heatmap from mask and synthesize saliency map using heatmap and img
-#         heatmap, cam_result = visualize_cam(mask, org_img, alpha=0.4)
-
-#         # Show images
-#         # for idx in np.arange(len(labels.numpy())):
-#         # Original picture
-#         ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
-#         npimg = np.transpose(org_img[0].cpu().numpy(),(1,2,0))
-#         ax.imshow(npimg, cmap='gray')
-#         ax.set_title("Label={}".format(str(classes[lbl])))
-#         idx_cnt+=1
-
-#         ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
-#         npimg = np.transpose(heatmap,(1,2,0))
-#         ax.imshow(npimg, cmap='gray')
-#         ax.set_title("HeatMap".format(str(classes[lbl])))
-#         idx_cnt+=1
-
-#         ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
-#         npimg = np.transpose(cam_result,(1,2,0))
-#         ax.imshow(npimg, cmap='gray')
-#         ax.set_title("GradCAM".format(str(classes[lbl])))
-#         idx_cnt+=1
-
-#     fig.tight_layout()  
-#     plt.show()
+    fig.tight_layout()  
+    plt.show()
