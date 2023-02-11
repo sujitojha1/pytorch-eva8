@@ -110,56 +110,6 @@ class dataset_cifar10:
         if return_flag:
             return images,labels
 
-    def plotGradCAM(self, net):
-
-        use_cuda = torch.cuda.is_available()
-        device = torch.device("cuda" if use_cuda else "cpu")
-
-        images, labels = next(iter(self.loader(False)))
-        classes = self.classes
-        
-        gradcam = GradCAM.from_config(model_type='resnet', arch=net, layer_name='layer4')
-
-        fig = plt.figure(figsize=(5, 10))
-        idx_cnt=1
-        for idx in np.arange(len(labels.numpy())):
-
-            img = images[idx]
-            lbl = labels.numpy()[idx]
-
-            # get an image and normalize with mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
-            img = img.unsqueeze(0).to(device)
-            org_img = denormalize(img,mean=(0.4914, 0.4822, 0.4471),std=(0.2469, 0.2433, 0.2615))
-
-            # get a GradCAM saliency map on the class index 10.
-            mask, logit = gradcam(img, class_idx=lbl)
-            # make heatmap from mask and synthesize saliency map using heatmap and img
-            heatmap, cam_result = visualize_cam(mask, org_img, alpha=0.4)
-
-            # Show images
-            # for idx in np.arange(len(labels.numpy())):
-            # Original picture
-            ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
-            npimg = np.transpose(org_img[0].cpu().numpy(),(1,2,0))
-            ax.imshow(npimg, cmap='gray')
-            ax.set_title("Label={}".format(str(classes[lbl])))
-            idx_cnt+=1
-
-            ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
-            npimg = np.transpose(heatmap,(1,2,0))
-            ax.imshow(npimg, cmap='gray')
-            ax.set_title("HeatMap".format(str(classes[lbl])))
-            idx_cnt+=1
-
-            ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
-            npimg = np.transpose(cam_result,(1,2,0))
-            ax.imshow(npimg, cmap='gray')
-            ax.set_title("GradCAM".format(str(classes[lbl])))
-            idx_cnt+=1
-
-        fig.tight_layout()  
-        plt.show()
-
 def unnormalize(img):
     channel_means = (0.4914, 0.4822, 0.4471)
     channel_stdevs = (0.2469, 0.2433, 0.2615)
@@ -474,3 +424,48 @@ class GradCAM:
 
     def __call__(self, input, class_idx=None, retain_graph=False):
         return self.forward(input, class_idx, retain_graph)
+
+# def plotGradCAM(net, testloader, classes, device):
+
+#     images, labels = next(iter(testloader))
+#     gradcam = GradCAM.from_config(model_type='resnet', arch=net, layer_name='layer4')
+
+#     fig = plt.figure(figsize=(5, 10))
+#     idx_cnt=1
+#     for idx in np.arange(len(labels.numpy())):
+
+#         img = images[idx]
+#         lbl = labels.numpy()[idx]
+
+#         # get an image and normalize with mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
+#         img = img.unsqueeze(0).to(device)
+#         org_img = denormalize(img,mean=(0.4914, 0.4822, 0.4471),std=(0.2469, 0.2433, 0.2615))
+
+#         # get a GradCAM saliency map on the class index 10.
+#         mask, logit = gradcam(img, class_idx=lbl)
+#         # make heatmap from mask and synthesize saliency map using heatmap and img
+#         heatmap, cam_result = visualize_cam(mask, org_img, alpha=0.4)
+
+#         # Show images
+#         # for idx in np.arange(len(labels.numpy())):
+#         # Original picture
+#         ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
+#         npimg = np.transpose(org_img[0].cpu().numpy(),(1,2,0))
+#         ax.imshow(npimg, cmap='gray')
+#         ax.set_title("Label={}".format(str(classes[lbl])))
+#         idx_cnt+=1
+
+#         ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
+#         npimg = np.transpose(heatmap,(1,2,0))
+#         ax.imshow(npimg, cmap='gray')
+#         ax.set_title("HeatMap".format(str(classes[lbl])))
+#         idx_cnt+=1
+
+#         ax = fig.add_subplot(5, 3, idx_cnt, xticks=[], yticks=[])
+#         npimg = np.transpose(cam_result,(1,2,0))
+#         ax.imshow(npimg, cmap='gray')
+#         ax.set_title("GradCAM".format(str(classes[lbl])))
+#         idx_cnt+=1
+
+#     fig.tight_layout()  
+#     plt.show()
