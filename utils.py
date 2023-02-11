@@ -222,21 +222,21 @@ def calClassAccuracy(net, dataloader, classes, device):
             classes[i], 100 * class_correct[i] / class_total[i]))
 
 
-# '''GradCAM in PyTorch.
-# Grad-CAM implementation in Pytorch
-# Reference:
-# [1] https://github.com/vickyliin/gradcam_plus_plus-pytorch
-# [2] The paper authors torch implementation: https://github.com/ramprs/grad-cam
-# '''
+'''GradCAM in PyTorch.
+Grad-CAM implementation in Pytorch
+Reference:
+[1] https://github.com/vickyliin/gradcam_plus_plus-pytorch
+[2] The paper authors torch implementation: https://github.com/ramprs/grad-cam
+'''
 
-# layer_finders = {}
+layer_finders = {}
 
 
-# def register_layer_finder(model_type):
-#     def register(func):
-#         layer_finders[model_type] = func
-#         return func
-#     return register
+def register_layer_finder(model_type):
+    def register(func):
+        layer_finders[model_type] = func
+        return func
+    return register
 
 
 # def visualize_cam(mask, img, alpha=1.0):
