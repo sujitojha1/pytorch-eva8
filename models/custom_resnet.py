@@ -16,11 +16,12 @@ class ResBlock(nn.Module):
             nn.BatchNorm2d(out_channels),
             nn.ReLU(),
         )
+        self.shortcut = nn.Sequential()
 
 
     def forward(self, x):
         out = self.resConv(x)
-        out += x
+        out += self.shortcut()
         return out
 
 class MixBlock(nn.Module):
