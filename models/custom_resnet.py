@@ -50,7 +50,7 @@ class CustomResNet(nn.Module):
         )
         self.layer3 = ResBlock(256, 512)
 
-        self.linear = nn.Linear(512*block.expansion, num_classes)
+        self.linear = nn.Linear(512, num_classes)
 
     def forward(self, x):
         out = self.prep_layer(x)
