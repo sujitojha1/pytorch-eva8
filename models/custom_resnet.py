@@ -30,7 +30,7 @@ class ResBlock(nn.Module):
         return out
 
 
-class ResNet(nn.Module):
+class CustomResNet(nn.Module):
     def __init__(self, block, num_blocks, num_classes=10):
         super(ResNet, self).__init__()
         self.in_planes = 64
