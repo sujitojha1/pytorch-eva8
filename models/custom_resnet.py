@@ -31,7 +31,7 @@ class ResBlock(nn.Module):
 
 class CustomResNet(nn.Module):
     def __init__(self, num_classes=10):
-        super(ResNet, self).__init__()
+        super(CustomResNet, self).__init__()
 
         self.prep_layer = nn.Sequential(
             nn.Conv2d(3, 64, kernel_size=3,
