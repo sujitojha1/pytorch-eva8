@@ -18,6 +18,7 @@ class ResBlock(nn.Module):
 
         self.shortcut = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, bias=False),
+            nn.MaxPool2d(2, 2),
             nn.BatchNorm2d(out_channels),
             nn.ReLU(),
         )
