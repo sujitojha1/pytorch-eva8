@@ -4,24 +4,24 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # Define the ResBlock class
+
 class ResBlock(nn.Module):
+    expansion = 1
+
     def __init__(self, in_channels, out_channels):
         super(ResBlock, self).__init__()
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size = 3, stride = 1, padding = 1, bias=False)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size = 3, stride = 1, padding = 1, bias = False)
+        self.bn2 = nn.BatchNorm2d(planes)
 
-        self.resConv = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size = 3, stride = 1, padding = 1, bias=False),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(),
-            nn.Conv2d(out_channels, out_channels, kernel_size = 3, stride = 1, padding = 1, bias = False),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(),
-        )
         self.shortcut = nn.Sequential()
 
-
     def forward(self, x):
-        out = self.resConv(x)
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = self.bn2(self.conv2(out))
         out += self.shortcut(x)
+        out = F.relu(out)
         return out
 
 class MixBlock(nn.Module):
