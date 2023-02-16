@@ -34,7 +34,7 @@ class MixBlock(nn.Module):
             nn.ReLU(),
         )
 
-        self.residual_block = ResBlock(in_channels, out_channels)
+        self.residual_block = ResBlock(out_channels, out_channels)
 
     def forward(self, x):
         out = self.convMaxPool(x)
