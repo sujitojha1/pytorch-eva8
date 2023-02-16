@@ -37,8 +37,9 @@ class MixBlock(nn.Module):
         self.residual_block = ResBlock(out_channels, out_channels)
 
     def forward(self, x):
-        out = self.convMaxPool(x)
-        out += self.residual_block(x)
+        X = self.convMaxPool(x)
+        R = self.residual_block(X)
+        out = X + R
         return out
 
 class CustomResNet(nn.Module):
