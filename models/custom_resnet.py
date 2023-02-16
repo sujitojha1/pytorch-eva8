@@ -28,6 +28,24 @@ class ResBlock(nn.Module):
         out += self.shortcut(x)
         return out
 
+class MixBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(MixBlock, self).__init__()
+
+        self.convMaxPool = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=3,
+                               stride=1, padding=1, bias=False),
+            nn.MaxPool2d(2, 2),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
+        )
+
+        self.residual_block = ResBlock(in_channels, out_channels)
+
+    def forward(self, x):
+        out = self.convMaxPool(x)
+        out += self.residual_block(x)
+        return out
 
 class CustomResNet(nn.Module):
     def __init__(self, num_classes=10):
@@ -40,7 +58,7 @@ class CustomResNet(nn.Module):
             nn.ReLU(),
         )
 
-        self.layer1 = ResBlock(64, 128)
+        self.layer1 = MixBlock(64, 128)
         self.layer2 = nn.Sequential(
             nn.Conv2d(128, 256, kernel_size=3,
                                stride=1, padding=1, bias=False),
@@ -48,7 +66,7 @@ class CustomResNet(nn.Module):
             nn.BatchNorm2d(256),
             nn.ReLU(),
         )
-        self.layer3 = ResBlock(256, 512)
+        self.layer3 = MixBlock(256, 512)
 
         self.linear = nn.Linear(512, num_classes)
 
