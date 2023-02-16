@@ -1,6 +1,7 @@
 # Import the necessary modules
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 # Define the ResBlock class
 class ResBlock(nn.Module):
