@@ -21,7 +21,7 @@ class ResBlock(nn.Module):
 
     def forward(self, x):
         out = self.resConv(x)
-        out += self.shortcut()
+        out += self.shortcut(x)
         return out
 
 class MixBlock(nn.Module):
