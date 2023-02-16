@@ -31,7 +31,7 @@ class ResBlock(nn.Module):
 
 
 class CustomResNet(nn.Module):
-    def __init__(self, num_blocks, num_classes=10):
+    def __init__(self, num_classes=10):
         super(ResNet, self).__init__()
 
         self.prep_layer = nn.Sequential(
@@ -54,11 +54,9 @@ class CustomResNet(nn.Module):
         self.linear = nn.Linear(512*block.expansion, num_classes)
 
     def _make_layer(self,in_channels, out_channels, num_blocks, stride):
-        strides = [stride] + [1] * (num_blocks - 1)
+
         layers = []
-        for stride in strides:
-            layers.append(ResBlock(in_channels, out_channels, stride))
-            in_channels = out_channels
+        layers.append(ResBlock(in_channels, out_channels, stride))
         return nn.Sequential(*layers)
 
     def forward(self, x):
