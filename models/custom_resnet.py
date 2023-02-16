@@ -41,7 +41,7 @@ class CustomResNet(nn.Module):
             nn.ReLU(),
         )
 
-        self.layer1 = self._make_layer(64, 128, stride=1)
+        self.layer1 = ResBlock(64, 128, stride=1)
         self.layer2 = nn.Sequential(
             nn.Conv2d(128, 256, kernel_size=3,
                                stride=1, padding=1, bias=False),
@@ -49,15 +49,9 @@ class CustomResNet(nn.Module):
             nn.BatchNorm2d(256),
             nn.ReLU(),
         )
-        self.layer3 = self._make_layer(256, 512, stride=1)
+        self.layer3 = ResBlock(256, 512, stride=1)
 
         self.linear = nn.Linear(512*block.expansion, num_classes)
-
-    def _make_layer(self,in_channels, out_channels, num_blocks, stride):
-
-        layers = []
-        layers.append(ResBlock(in_channels, out_channels, stride))
-        return nn.Sequential(*layers)
 
     def forward(self, x):
         out = self.prep_layer(x)
