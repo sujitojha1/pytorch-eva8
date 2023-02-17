@@ -156,6 +156,36 @@ def plot_loss_accuracy_graph(trainObj, testObj, EPOCHS):
     plt.tight_layout()
     plt.show()
 
+def plot_loss_accuracy_graph_OneCLR(trainAcc, trainLoss, testAcc, testLoss):
+
+    fig, ax = plt.subplots(1, 2, figsize=(15, 5))
+
+    # Loss Plot
+    ax[0].plot(trainLoss, label='Training Loss')
+    ax[0].set_xlabel('Epochs')
+    ax[0].set_ylabel('Loss')
+    ax[0].set_title('Loss vs. Epochs')
+    ax[0].legend()
+
+    ax2 = ax[0].twinx()
+    ax2.plot(testLoss, label='Test Loss', color='red')
+    ax2.set_ylabel('Loss')
+    ax2.legend(loc='center right')
+
+    # Accuracy Plot
+    ax[1].plot(trainAcc, label='Training Accuracy')
+    ax[1].set_xlabel('Epochs')
+    ax[1].set_ylabel('Accuracy')
+    ax[1].set_title('Accuracy vs. Epochs')
+    ax[1].legend()
+
+    ax2 = ax[1].twinx()
+    ax2.plot(testAcc, label='Test Accuracy', color='red')
+    ax2.set_ylabel('Accuracy')
+    ax2.legend(loc='center right')
+
+    plt.tight_layout()
+    plt.show()
 
 # define a function to plot misclassified images
 def plot_misclassified_images(model, test_loader, classes, device):
@@ -408,7 +438,7 @@ class GradCAM:
     def __call__(self, input, class_idx=None, retain_graph=False):
         return self.forward(input, class_idx, retain_graph)
 
-def plotGradCAM(net, testloader, classes, device):
+def plotGradCAM(net, testloader, classes, device, layer_name='layer4'):
 
 
     net.eval()
@@ -428,7 +458,7 @@ def plotGradCAM(net, testloader, classes, device):
                     actual_labels.append(target[i])
                     predicted_labels.append(pred[i])
 
-    gradcam = GradCAM.from_config(model_type='resnet', arch=net, layer_name='layer4')
+    gradcam = GradCAM.from_config(model_type='resnet', arch=net, layer_name=layer_name)
 
     fig = plt.figure(figsize=(10, 10))
     idx_cnt=1
