@@ -69,6 +69,8 @@ class CustomResNet(nn.Module):
 
         self.linear = nn.Linear(512, num_classes)
 
+        self.softmaxLayer = nn.LogSoftmax(dim=1)
+
     def forward(self, x):
         out = self.prep_layer(x)
         out = self.layer1(out)
@@ -76,5 +78,5 @@ class CustomResNet(nn.Module):
         out = self.layer3(out)
         out = self.layer4(out)
         out = out.view(out.size(0), -1)
-        out = self.linear(out)
+        out = self.softmaxLayer(self.linear(out))
         return out
