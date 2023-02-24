@@ -65,6 +65,8 @@ class CustomResNet(nn.Module):
         )
         self.layer3 = MixBlock(256, 512)
 
+        self.layer4 = nn.MaxPool2d(4)
+
         self.linear = nn.Linear(512, num_classes)
 
     def forward(self, x):
@@ -72,7 +74,7 @@ class CustomResNet(nn.Module):
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
-        out = F.avg_pool2d(out, 4)
+        out = self.layer4(out)
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
