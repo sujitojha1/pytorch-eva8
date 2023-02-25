@@ -34,14 +34,8 @@ class net(nn.Module):
         
         self.convBlock = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, stride=1, padding=0, bias=False),
-            nn.BatchNorm2d(16),
-            nn.ReLU(),
             nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=1, padding=0, bias=False),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
             nn.Conv2d(in_channels=32, out_channels=48, kernel_size=3, stride=1, padding=0, bias=False),
-            nn.BatchNorm2d(48),
-            nn.ReLU(),
         )
 
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
