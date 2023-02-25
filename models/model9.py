@@ -34,13 +34,13 @@ class net(nn.Module):
         
         self.convBlock = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=0, bias=False),
-            nn.GeLU(),
+            nn.GELU(),
             nn.BatchNorm2d(32),
             nn.Conv2d(in_channels=32, out_channels=256, kernel_size=3, stride=1, padding=0, bias=False),
-            nn.GeLU(),
+            nn.GELU(),
             nn.BatchNorm2d(256),
             nn.Conv2d(in_channels=256, out_channels=48, kernel_size=3, stride=1, padding=0, bias=False),
-            nn.GeLU(),
+            nn.GELU(),
             nn.BatchNorm2d(48),
         )
 
