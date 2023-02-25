@@ -53,7 +53,7 @@ class net(nn.Module):
 
     def forward(self, x):
         out = self.convBlock(x)
-        out = F.AdaptiveAvgPool2d(x)
+        out = F.avg_pool2d(out, 4)
         out = self.ULTIMUS1(out)
         out = self.ULTIMUS2(out)
         out = self.ULTIMUS3(out)
