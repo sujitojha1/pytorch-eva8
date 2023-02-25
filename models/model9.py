@@ -15,7 +15,7 @@ class ULTIMUS(nn.Module):
         self.attend = nn.Softmax(dim = -1)
         self.outputFC = nn.Linear(8,48)
 
-    def forward(x):
+    def forward(self, x):
         K = self.keyLayer(x)
         Q = self.QueryLayer(x)
         V = self.ValueLayer(x)
@@ -51,7 +51,7 @@ class net(nn.Module):
 
         self.FC = nn.Linear(48,10)
 
-    def forward(x):
+    def forward(self, x):
         out = self.convBlock(x)
         out = F.AdaptiveAvgPool2d(x)
         out = self.ULTIMUS1(out)
