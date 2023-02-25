@@ -20,7 +20,7 @@ class ULTIMUS(nn.Module):
         Q = self.QueryLayer(x)
         V = self.ValueLayer(x)
 
-        dot = torch.matmul(Q.transpose(-1, -2), K) * self.scale
+        dots = torch.matmul(Q.transpose(-1, -2), K) * self.scale
         AM = self.attend(dots)
         Z = torch.matmul(V, AM)
 
