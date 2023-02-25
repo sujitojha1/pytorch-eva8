@@ -20,7 +20,7 @@ class ULTIMUS(nn.Module):
         Q = self.QueryLayer(x)
         V = self.ValueLayer(x)
 
-        dots = torch.matmul(Q.transpose(-1, -2), K) * self.scale
+        dot = torch.matmul(Q.transpose(-1, -2), K) * self.scale
         AM = self.attend(dots)
         Z = torch.matmul(V, AM)
 
@@ -34,8 +34,14 @@ class net(nn.Module):
         
         self.convBlock = nn.Sequential(
             nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
             nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
             nn.Conv2d(in_channels=32, out_channels=48, kernel_size=3, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(48),
+            nn.ReLU(),
         )
 
         self.gap = nn.AdaptiveAvgPool2d((1, 1))
@@ -57,6 +63,6 @@ class net(nn.Module):
         out = self.ULTIMUS4(out)
 
         out = self.FC(out)
-        return out
+        return output
 
 
