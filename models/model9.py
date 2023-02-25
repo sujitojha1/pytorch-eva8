@@ -63,6 +63,6 @@ class net(nn.Module):
         out = self.ULTIMUS4(out)
 
         out = self.FC(out)
-        return out
+        return F.log_softmax(out, dim=-1)
 
 
