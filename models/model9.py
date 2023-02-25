@@ -44,7 +44,7 @@ class net(nn.Module):
             nn.ReLU(),
         )
 
-        self.gap = nn.AdaptiveAvgPool2d(1)
+        self.gap = nn.AdaptiveAvgPool2d((1, 1))
 
         self.ULTIMUS1 = ULTIMUS()
         self.ULTIMUS2 = ULTIMUS()
@@ -56,6 +56,7 @@ class net(nn.Module):
     def forward(self, x):
         out = self.convBlock(x)
         out = self.gap(out)
+        out = out.view(out.size(0), -1)
         out = self.ULTIMUS1(out)
         out = self.ULTIMUS2(out)
         out = self.ULTIMUS3(out)
