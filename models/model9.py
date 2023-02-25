@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ULTIMUS(nn.module):
+class ULTIMUS(nn.Module):
     def __init__(self):
         super().__init__()
 
@@ -28,7 +28,7 @@ class ULTIMUS(nn.module):
         return out
 
 
-class net(nn.module):
+class net(nn.Module):
     def __init__(self):
         super().__init__()
         
