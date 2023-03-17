@@ -83,7 +83,40 @@ class CIFAR10DataLoader:
         testset = datasets.CIFAR10(root='./data', train=False,
                                    download = True, transform=test_transform)
 
-        
+        # Create data loader for test data
+        self.testloader = torch.utils.data.DataLoader(testset, batch_size=64,
+                                                      shuffle=False, num_workers=4)
+
+        return self.trainloader, self.testloader
+
+    def show_sample_images(self, train=True, num_images=5):
+        """
+        Displays some sample images from the train or test data
+
+        Args:
+            train (bool): Whether to display images from train or test data. Default is True.
+            num_images (int): Number of images to display. Default is 5.
+        """
+        if train:
+            data_iter = iter(self.trainloader)
+        else:
+            data_iter = iter(self.testloader)
+
+        images, labels = data_iter.next()
+
+        # plot images
+        fig = plt.figure(figsize=(8,8))
+
+        for i in range(num_images):
+            ax = fig.add_subplot(1, num_images, i+1, xticks=[], yticks=[])
+            img = images[i].numpy().astype(dtype=np.float32)
+  
+            for j in range(img.shape[0]):
+                img[j] = (img[j]*self.dataset_mean[j])+self.dataset_std[j]
+            ax.imshow(img.permute(1,2,0))
+            ax.set_title(self.classes[labels[i].item()])
+
+        plt.show()
 
 
 class dataset_cifar10:
