@@ -37,6 +37,55 @@ class album_Compose_test():
         img = self.albumentations_transform(image=img)['image']
         return img
 
+class CIFAR10DataLoader:
+    """
+    A class to load CIFAR-10 dataset and return data loaders for training and test data,
+    and to display some sample images from the dataset
+    """
+
+    def __init__(self, train_batch_size=128):
+        """
+        Initializes the data loader with the CIFAR-10 dataset and transforms for the data augmentation.
+        """
+        self.train_batch_size = train_batch_size
+        self.dataset_mean = (0.4914, 0.4822, 0.4465)
+        self.dataset_std = (0.2471, 0.2435, 0.2616)
+        self.classes = ('plane', 'car', 'bird', 'cat',
+            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+        
+        self.trainloader, self.testloader = None, None
+        
+    def get_data_loaders(self):
+        """
+        Returns data loaders for training and test data
+        """
+        train_transform = transforms.Compose([
+            transforms.RandomResizedCrop(32, scale=(0.75,1.0), ratio=(1.0,1.0)),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandAugment(num_ops=1, magnitude=8),
+            transforms.ColorJitter(0.1,0.1,0.1),
+            transforms.ToTensor(),
+            transfomrs.Normalize(self.dataset_mean,self.dataset_std),
+            transforms.RandomErasing(p=0.25)
+        ])
+
+        test_transform = transforms.Compose([
+            transforms.ToTensor(),
+            transfomrs.Normalize(self.dataset_mean, self.dataset_std)
+        ])
+
+        trainset = datasets.CIFAR10(root='./data', train=True,
+                                    download=True, transform=train_transform)
+        # Create data loader for training data
+        self.trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.train_batch_size,
+                                                       shuffle=True, num_workers=4)
+
+        testset = datasets.CIFAR10(root='./data', train=False,
+                                   download = True, transform=test_transform)
+
+        
+
+
 class dataset_cifar10:
     """
     Class to load the data and define the data loader
