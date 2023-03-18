@@ -79,7 +79,7 @@ class CIFAR10DataLoader:
         # Create data loader for training data
         self.trainloader = torch.utils.data.DataLoader(trainset, batch_size=self.train_batch_size,
                                                        shuffle=True, 
-                                                       #num_workers=4
+                                                       num_workers=4
                                                        )
 
         testset = datasets.CIFAR10(root='./data', train=False,
@@ -88,7 +88,7 @@ class CIFAR10DataLoader:
         # Create data loader for test data
         self.testloader = torch.utils.data.DataLoader(testset, batch_size=64,
                                                       shuffle=False, 
-                                                      #num_workers=4
+                                                      num_workers=4
                                                       )
 
         return self.trainloader, self.testloader
