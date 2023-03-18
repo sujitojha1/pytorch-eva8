@@ -106,7 +106,7 @@ class CIFAR10DataLoader:
         else:
             data_iter = iter(self.testloader)
 
-        images, labels = data_iter.next()
+        images, labels = next(data_iter)
 
         # plot images
         fig = plt.figure(figsize=(8,8))
