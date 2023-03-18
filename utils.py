@@ -70,8 +70,8 @@ class CIFAR10DataLoader:
         ])
 
         test_transform = transforms.Compose([
-            transfomrs.ToTensor(),
-            transfomrs.Normalize(self.dataset_mean, self.dataset_std)
+            transforms.ToTensor(),
+            transforms.Normalize(self.dataset_mean, self.dataset_std)
         ])
 
         trainset = datasets.CIFAR10(root='./data', train=True,
