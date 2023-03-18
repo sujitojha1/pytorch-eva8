@@ -65,12 +65,12 @@ class CIFAR10DataLoader:
             transforms.RandAugment(num_ops=1, magnitude=8),
             transforms.ColorJitter(0.1,0.1,0.1),
             transforms.ToTensor(),
-            transfomrs.Normalize(self.dataset_mean,self.dataset_std),
+            transforms.Normalize(self.dataset_mean,self.dataset_std),
             transforms.RandomErasing(p=0.25)
         ])
 
         test_transform = transforms.Compose([
-            transforms.ToTensor(),
+            transfomrs.ToTensor(),
             transfomrs.Normalize(self.dataset_mean, self.dataset_std)
         ])
 
