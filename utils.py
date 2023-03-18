@@ -109,7 +109,7 @@ class CIFAR10DataLoader:
         images, labels = next(data_iter)
 
         # plot images
-        fig = plt.figure(figsize=(8,8))
+        fig = plt.figure(figsize=(12,12))
 
         for i in range(num_images):
             ax = fig.add_subplot(1, num_images, i+1, xticks=[], yticks=[])
