@@ -117,7 +117,7 @@ class CIFAR10DataLoader:
   
             for j in range(img.shape[0]):
                 img[j] = (img[j]*self.dataset_mean[j])+self.dataset_std[j]
-            ax.imshow(img.permute(1,2,0))
+            ax.imshow(np.transpose(img, (1,2,0)))
             ax.set_title(self.classes[labels[i].item()])
 
         plt.show()
