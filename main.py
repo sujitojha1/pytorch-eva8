@@ -6,6 +6,7 @@ from torch.optim.lr_scheduler import StepLR
 import torch.nn as nn
 import numpy as np
 from torch.utils.data import DataLoader
+import time
 
 def trainTransformer(model: nn.Module, trainloader: DataLoader,
                     testloader: DataLoader, epochs: int = 25, lr: float = 0.01,
