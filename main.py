@@ -49,7 +49,7 @@ def trainTransformer(model: nn.Module, trainloader: DataLoader,
             X, y = X.cuda(), y.cuda()
 
             # Update learning rate
-            if scheduler:
+            if scheduler_flag:
                 lr = lr_schedule(epoch + (i + 1)/len(trainloader))
                 opt.param_groups[0].update(lr=lr)
                 lr_hist.append(lr)
