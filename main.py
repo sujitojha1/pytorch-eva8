@@ -98,7 +98,7 @@ def trainTransformer(model: nn.Module, trainloader: DataLoader,
               f'Test Acc: {test_acc:.4f}, ',
               f'Time: {time.time() - start:.1f}, ',
               f'lr: {lr:.6f}')
-        
+    return model, training_acc, training_loss, testing_acc, testing_loss
 
 def trainOneCLR(model, device, train_loader, criterion, scheduler, optimizer, use_l1=False, lambda_l1=0.01):
     """Function to train the model
