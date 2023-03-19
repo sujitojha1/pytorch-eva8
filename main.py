@@ -10,7 +10,7 @@ import time
 
 def trainTransformer(model: nn.Module, trainloader: DataLoader,
                     testloader: DataLoader, epochs: int = 25, lr_max: float = 0.01,
-                    clip_norm: bool = True, scheduler: bool = False) -> Tuple[nn.Module, Tuple[List[float], List[float], List[float], List[float], List[float]]]:
+                    clip_norm: bool = True, scheduler_flag: bool = False) -> Tuple[nn.Module, Tuple[List[float], List[float], List[float], List[float], List[float]]]:
 
     """Train a neural network
 
@@ -91,7 +91,7 @@ def trainTransformer(model: nn.Module, trainloader: DataLoader,
         test_loss /= m
         test_acc /= m
 
-        if scheduler:
+        if scheduler_flag:
             scheduler.step()
 
         print(f'VIT: Epoch: {epoch} | ',
