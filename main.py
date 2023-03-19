@@ -76,7 +76,7 @@ def trainTransformer(model: nn.Module, trainloader: DataLoader,
         model.eval()
         test_loss, test_acc, m = 0, 0, 0
 
-        with torch.no_group():
+        with torch.no_grad():
             for X, y in testloader:
                 X, y = X.cuda(), y.cuda()
                 with torch.cuda.amp.autocast():
