@@ -30,7 +30,7 @@ def trainTransformer(model: nn.Module, trainloader: DataLoader,
     lr_hist = []
 
     # Define learning rate scheduler
-    if scheduler:
+    if scheduler_flag:
         lr_schedule = lambda t: np.interp([t], [0, epochs*2//5, epochs*4//5,epochs],
                                          [0, lr_max, lr_max/20.0, 0])[0]
 
