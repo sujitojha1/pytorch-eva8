@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 
 def trainTransformer(model: nn.Module, trainloader: DataLoader,
                     testloader: DataLoader, epochs: int = 25, lr: float = 0.01,
-                    clip_norm: bool = True, scheduler: bool = False) -> Tuple[nn.Module, Tuplle[List[float], List[float], List[float], List[float], List[float]]]:
+                    clip_norm: bool = True, scheduler: bool = False) -> Tuple[nn.Module, Tuple[List[float], List[float], List[float], List[float], List[float]]]:
 
     """Train a neural network
 
