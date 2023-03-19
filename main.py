@@ -91,9 +91,6 @@ def trainTransformer(model: nn.Module, trainloader: DataLoader,
         test_loss /= m
         test_acc /= m
 
-        if scheduler_flag:
-            scheduler.step()
-
         print(f'VIT: Epoch: {epoch} | ',
               f'Train Acc: {train_acc:.4f}, ',
               f'Test Acc: {test_acc:.4f}, ',
