@@ -82,7 +82,7 @@ def trainTransformer(model: nn.Module, trainloader: DataLoader,
                 with torch.cuda.amp.autocast():
                     output = model(X)
                     test_loss += criterion(output, y).item() * y.size(0)
-                    test_acc += (output.max(1)[1] == y).sum().items()
+                    test_acc += (output.max(1)[1] == y).sum().item()
 
                     m += y.size(0)
 
