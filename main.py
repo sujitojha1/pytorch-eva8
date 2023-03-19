@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 import time
 
 def trainTransformer(model: nn.Module, trainloader: DataLoader,
-                    testloader: DataLoader, epochs: int = 25, lr: float = 0.01,
+                    testloader: DataLoader, epochs: int = 25, lr_max: float = 0.01,
                     clip_norm: bool = True, scheduler: bool = False) -> Tuple[nn.Module, Tuple[List[float], List[float], List[float], List[float], List[float]]]:
 
     """Train a neural network
@@ -19,7 +19,7 @@ def trainTransformer(model: nn.Module, trainloader: DataLoader,
         trainloader (DataLoader): trainloader with train dataset
         testloader (DataLoader): testloader with test dataset
         epochs (int, optional): number of epoachs to train for. Defaults is 25.
-        lr (float, optional): float  specifying the learning rate. Defaults 0.01.
+        lr_max (float, optional): float  specifying the maximum learning rate. Defaults 0.01.
         clip_norm (bool, optional): whether to clip gradients by norm of 1. Default is True.
         scheduler (bool, optional): whether to use learning rate scheduler. Defaults to False.
 
@@ -32,11 +32,11 @@ def trainTransformer(model: nn.Module, trainloader: DataLoader,
     # Define learning rate scheduler
     if scheduler:
         lr_schedule = lambda t: np.interp([t], [0, epochs*2//5, epochs*4//5,epochs],
-                                         [0, lr, lr/20.0, 0])[0]
+                                         [0, lr_max, lr_max/20.0, 0])[0]
 
     # Define optimizer and criterion 
     model = nn.DataParallel(model, device_ids=[0]).cuda()
-    opt = optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
+    opt = optim.AdamW(model.parameters(), lr=lr_max, weight_decay=0.01)
     criterion = nn.CrossEntropyLoss()
     scaler = torch.cuda.amp.GradScaler()
 
