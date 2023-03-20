@@ -29,6 +29,15 @@ class AddPositionEmbedding(nn.Module):
     def forward(self, x):
         return x + self.pos_embedding
 
+class ToEmbedding(nn.Sequential):
+    def __init__(self, in_channels, channels, patch_size, shape, p_drop=0.):
+        super().__init__(
+            ToPatches(in_channels, channels, patch_size),
+            AddPositionEmbedding(channels, shape),
+            nn.Dropout(p_drop)
+        )
+
+
 class PreNorm(nn.Module):
     def __init__(self, dim, fn):
         super().__init__()
