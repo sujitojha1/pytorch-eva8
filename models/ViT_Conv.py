@@ -13,6 +13,22 @@ def pair(t):
 
 # classes
 
+class ToPatches(nn.Sequential):
+    def __init__(self, in_channels, channels, patch_size, hidden_channels=32):
+        super().__init__(
+            nn.Conv2d(in_channels, hidden_channels, 3, padding=1),
+            nn.GELU(),
+            nn.Conv2d(hidden_channels, channels, patch_size, stride=patch_size)
+        )
+
+class AddPositionEmbedding(nn.Module):
+    def __init__(self, channels, shape):
+        super().__init__()
+        self.pos_embedding = nn.Parameter(torch.Tensor(channels, *shape))
+    
+    def forward(self, x):
+        return x + self.pos_embedding
+
 class PreNorm(nn.Module):
     def __init__(self, dim, fn):
         super().__init__()
@@ -90,7 +106,8 @@ class ViT(nn.Module):
         patch_dim = channels * patch_height * patch_width
         assert pool in {'cls', 'mean'}, 'pool type must be either cls (cls token) or mean (mean pooling)'
 
-        self.to_patch_embedding = nn.Sequential(
+        self.to_patch_embedding = ToPatches(3, dim, patch_size)
+        nn.Sequential(
             Rearrange('b c (h p1) (w p2) -> b (h w) (p1 p2 c)', p1 = patch_height, p2 = patch_width),
             nn.Linear(patch_dim, dim),
         )
