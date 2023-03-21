@@ -119,7 +119,8 @@ class ViT(nn.Module):
         shape = (reduced_size, reduced_size)
 
         self.to_patch_embedding = ToEmbedding(3, channels, patch_size, shape, emb_p_drop)
-
+        self.flatten = nn.Flatten(start_dim=2, # flatten feature_map_height (dimension 2)
+                                  end_dim=3)   # flatten feature_map_width (dimension 3)
 
         self.cls_token = nn.Parameter(torch.randn(1, 1, dim))
         self.dropout = nn.Dropout(emb_dropout)
