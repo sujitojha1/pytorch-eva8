@@ -138,6 +138,8 @@ class ViT(nn.Module):
         x = self.to_patch_embedding(img)
         x = self.flatten(x)
 
+        x = x.permute(0, 2, 1)
+
         b, n, _ = x.shape
         cls_tokens = repeat(self.cls_token, '() n d -> b n d', b = b)
         x = torch.cat((cls_tokens, x), dim=1)
