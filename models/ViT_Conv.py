@@ -123,6 +123,10 @@ class ViT(nn.Module):
                                   end_dim=3)   # flatten feature_map_width (dimension 3)
 
         self.cls_token = nn.Parameter(torch.randn(1, 1, dim))
+
+        self.pos_embedding = nn.Parameter(data=torch.randn(1, num_patches+1, dim),
+                                               requires_grad=True)
+
         self.dropout = nn.Dropout(emb_dropout)
 
         self.transformer = Transformer(dim, depth, heads, dim_head, mlp_dim, dropout)
@@ -144,6 +148,7 @@ class ViT(nn.Module):
         cls_tokens = repeat(self.cls_token, '() n d -> b n d', b = b)
         x = torch.cat((cls_tokens, x), dim=1)
 
+        x = self.pos_embedding + x
         x = self.dropout(x)
 
         x = self.transformer(x)
