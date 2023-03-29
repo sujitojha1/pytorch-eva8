@@ -118,7 +118,7 @@ class ViT(nn.Module):
         reduced_size = image_size // patch_size
         shape = (reduced_size, reduced_size)
 
-        self.to_patch_embedding = ToEmbedding(3, channels, patch_size, shape, emb_p_drop)
+        self.to_patch_embedding = ToEmbedding(3, dim, patch_size, shape, emb_p_drop)
         self.flatten = nn.Flatten(start_dim=2, # flatten feature_map_height (dimension 2)
                                   end_dim=3)   # flatten feature_map_width (dimension 3)
 
