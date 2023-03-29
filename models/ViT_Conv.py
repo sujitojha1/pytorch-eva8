@@ -114,7 +114,6 @@ class ViT(nn.Module):
 
         num_patches = (image_height // patch_height) * (image_width // patch_width)
         patch_dim = channels * patch_height * patch_width
-        assert pool in {'cls', 'mean'}, 'pool type must be either cls (cls token) or mean (mean pooling)'
 
         reduced_size = image_size // patch_size
         shape = (reduced_size, reduced_size)
