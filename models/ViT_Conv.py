@@ -132,6 +132,8 @@ class ViT(nn.Module):
             nn.Linear(dim, num_classes)
         )
 
+
+
     def forward(self, img):
         x = self.to_patch_embedding(img)
         x = self.flatten(x)
@@ -139,7 +141,7 @@ class ViT(nn.Module):
         b, n, _ = x.shape
         cls_tokens = repeat(self.cls_token, '() n d -> b n d', b = b)
         x = torch.cat((cls_tokens, x), dim=1)
-        x += self.pos_embedding[:, :(n + 1)]
+
         x = self.dropout(x)
 
         x = self.transformer(x)
