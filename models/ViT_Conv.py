@@ -137,7 +137,6 @@ class ViT(nn.Module):
         )
 
 
-
     def forward(self, img):
         x = self.to_patch_embedding(img)
         x = self.flatten(x)
