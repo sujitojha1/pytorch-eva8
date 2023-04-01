@@ -123,6 +123,7 @@ class CIFAR10DataLoader:
         plt.show()
 
 
+
 class dataset_cifar10:
     """
     Class to load the data and define the data loader
