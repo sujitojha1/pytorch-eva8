@@ -118,8 +118,8 @@ class Transformer(nn.Module):
 
 class ViT(nn.Module):
     """Vision Transformer (ViT) architecture."""
-    def init(self, image_size=32, patch_size=2, num_classes=10, dim=256, depth=4, heads=8, mlp_dim=256, dim_head=8, emb_p_drop=0., dropout=0., emb_dropout=0.):
-        super().init()
+    def __init__(self, image_size=32, patch_size=2, num_classes=10, dim=256, depth=4, heads=8, mlp_dim=256, dim_head=8, emb_p_drop=0., dropout=0., emb_dropout=0.):
+        super().__init__()
         image_height, image_width = pair(image_size)
         patch_height, patch_width = pair(patch_size)
 
